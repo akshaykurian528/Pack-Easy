@@ -1,6 +1,7 @@
 package com.example.pack_easy;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -82,47 +83,82 @@ public class CheckList extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        Intent intent = new Intent(this,CheckList.class);
+        Intent intent = new Intent(this, CheckList.class);
         AppData appData = new AppData(database, this);
 
-        switch (item.getItemId()) {
-            case R.id.btnMySelections:
-                intent.putExtra(MyConstants.HEADER_SMALL, MyConstants.MY_SELECTIONS);
-                intent.putExtra(MyConstants.SHOW_SMALL, MyConstants.FALSE_STRING);
-                startActivityForResult(intent, 101);
-                return true;
-
-            case R.id.btnCustomList:
-                intent.putExtra(MyConstants.HEADER_SMALL, MyConstants.MY_LIST_CAMEL_CASE);
-                intent.putExtra(MyConstants.SHOW_SMALL, MyConstants.TRUE_STRING);
-                startActivity(intent);
-                return true;
-
-            case R.id.btnDeleteDefault:
-                new AlertDialog.Builder(this)
-                        .setTitle("Delete default data")
-                        .setMessage("Are you Sure?\n\n All data will be deleted")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                appData.persistDataByCategory(header,true);
-                                itemsList = database.mainDao().getAll(header);
-                                updateRecycler(itemsList);
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                            }
-                        }).setIcon(R.drawable.alert_ic)
-                        .show();
-                return true;
-
+        if (item.getItemId() == R.id.btnMySelections) {
+            // Handle btnMySelections
+            intent.putExtra(MyConstants.HEADER_SMALL, MyConstants.MY_SELECTIONS);
+            intent.putExtra(MyConstants.SHOW_SMALL, MyConstants.FALSE_STRING);
+            startActivityForResult(intent, 101);
+            return true;
+        } else if (item.getItemId() == R.id.btnCustomList) {
+            // Handle btnCustomList
+            intent.putExtra(MyConstants.HEADER_SMALL, MyConstants.MY_LIST_CAMEL_CASE);
+            intent.putExtra(MyConstants.SHOW_SMALL, MyConstants.TRUE_STRING);
+            startActivity(intent);
+            return true;
+        } else if (item.getItemId() == R.id.btnDeleteDefault) {
+            // Handle btnDeleteDefault
+            new AlertDialog.Builder(this)
+                    .setTitle("Delete default data")
+                    .setMessage("Are you Sure?\n\n All data will be deleted")
+                    .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            appData.persistDataByCategory(header, true);
+                            itemsList = database.mainDao().getAll(header);
+                            updateRecycler(itemsList);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Handle cancel button click
+                        }
+                    })
+                    .setIcon(R.drawable.alert_ic)
+                    .show();
+            return true;
+        } else if (item.getItemId() == R.id.btnReset) {
+            // Handle btnReset
+            new AlertDialog.Builder(this)
+                    .setTitle("Reset to Default")
+                    .setMessage("Are you Sure?\n\n This will delete the custom data that you have added in and load the default data in ("+ header +")")
+                    .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            appData.persistDataByCategory(header, false);
+                            itemsList = database.mainDao().getAll(header);
+                            updateRecycler(itemsList);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Handle cancel button click
+                        }
+                    })
+                    .setIcon(R.drawable.alert_ic)
+                    .show();
+            return true;
+        } else if (item.getItemId() == R.id.btnExit) {
+            this.finishAffinity();
+            Toast.makeText(this, "Pack-Easy\nExit Completed", Toast.LENGTH_SHORT).show();
+            return true;
         }
+
         return super.onOptionsItemSelected(item);
-        }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==101){
+            itemsList = database.mainDao().getAll(header);
+            updateRecycler(itemsList);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +188,7 @@ public class CheckList extends AppCompatActivity {
         }
 
         updateRecycler(itemsList);
+
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
