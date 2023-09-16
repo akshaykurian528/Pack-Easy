@@ -2,6 +2,7 @@ package com.example.pack_easy.Data;
 
 import android.app.Application;
 import android.content.Context;
+import android.widget.Toast;
 
 import com.example.pack_easy.Constants.MyConstants;
 import com.example.pack_easy.Models.Items;
@@ -78,6 +79,11 @@ public class AppData extends Application {
         return prepareItemsList(MyConstants.CAR_SUPPLIES_CAMEL_CASE, data);
     }
 
+    public List<Items> getNeedsData(){
+        String[] data = {"Tooth brush","Paste"};
+        return prepareItemsList(MyConstants.NEEDS_CAMEL_CASE, data);
+    }
+
     public List<Items> prepareItemsList(String category, String[] data) {
         List<String> list = Arrays.asList(data);
         List<Items>dataList = new ArrayList<>();
@@ -101,8 +107,10 @@ public class AppData extends Application {
         listofAllItems.add(getFoodNeedData());
         listofAllItems.add(getBeachNeedData());
         listofAllItems.add(getCarNeedData());
+        listofAllItems.add(getNeedsData());
         return listofAllItems;
     }
+
 
     public void persistAllData(){
         List<List<Items>> listofAllItems = getAllData();
@@ -112,6 +120,68 @@ public class AppData extends Application {
             }
         }
         System.out.println("Data Added");
+    }
+
+    public void persistDataByCategory(String category,Boolean onlyDelete){
+        try{
+            List<Items> list = deleteAndGetListByCategory(category, onlyDelete);
+            if (!onlyDelete) {
+                for (Items item: list){
+                    database.mainDao().saveItem(item);
+                }
+                Toast.makeText(this, category + "Reset Successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, category + "Reset Successfully", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private List<Items> deleteAndGetListByCategory(String category,Boolean onlyDelete){
+        if(onlyDelete){
+            database.mainDao().deleteAllByCategory(category,MyConstants.SYSTEM_SMALL);
+        } else {
+            database.mainDao().deleteAllByCategory(category);
+        }
+
+        switch (category){
+            case MyConstants.BASIC_NEEDS_CAMEL_CASE:
+                return getBasicData();
+
+            case MyConstants.CLOTHING_CAMEL_CASE:
+                return getClothingData();
+
+            case MyConstants.PERSONAL_CARE_CAMEL_CASE:
+                return getPersonalCareData();
+
+            case MyConstants.BABY_NEEDS_CAMEL_CASE:
+                return getBabyNeedData();
+
+            case MyConstants.HEALTH_CAMEL_CASE:
+                return getHealthData();
+
+            case MyConstants.TECHNOLOGY_CAMEL_CASE:
+                return getTechnologyData();
+
+            case MyConstants.FOOD_CAMEL_CASE:
+                return getFoodNeedData();
+
+            case MyConstants.BEACH_SUPPLIES_CAMEL_CASE:
+                return getBeachNeedData();
+
+            case MyConstants.CAR_SUPPLIES_CAMEL_CASE:
+                return getCarNeedData();
+
+            case MyConstants.NEEDS_CAMEL_CASE:
+                return getNeedsData();
+
+            default:
+                return new ArrayList<>();
+
+
+        }
     }
 
 }
