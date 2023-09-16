@@ -39,7 +39,7 @@ public class AppData extends Application {
     }
 
     public List<Items> getPersonalCareData(){
-        String[] data = {"Tooth brush","Paste"};
+        String[] data = {"Tooth brush","Paste","Bottle"};
         return prepareItemsList(MyConstants.PERSONAL_CARE_CAMEL_CASE, data);
     }
 
